@@ -1,0 +1,107 @@
+import ai.alphastream.model.Value;
+import ai.alphastream.model2.Value;
+import ai.alphastream.model.DataPoint;
+import java.util.Map;
+import java.util.List;
+import function ai.alphastream.utils.DataTypeValidationUtil.isMoney;
+import function ai.alphastream.utils.DataTypeValidationUtil.isPercentage;
+
+import function ai.alphastream.utils.DataTypeValidationUtil.comparePercentageValues;
+
+//global ai.alphastream.model.Value globalValue;
+global Map<String, List<Long>> globalValidationRulesMap;
+global List<Long> globalNonEmptyList;
+
+dialect "mvel"
+
+//rule "Term Loan amount (dataPointId 1008) must be present"
+//    when
+//        Value(d1008.value == null || d1008.value.empty)
+//    then
+//        System.out.println("========== Term Loan amount is not present =============");
+//        globalValue.d1008.validations.put(drools.getRule().getName(), false);
+//end
+//
+//rule "Term Loan amount (Type) (dataPointId 5518) must be present"
+//    when
+//        Value(d5518.value == null || d5518.value.empty)
+//    then
+//        System.out.println("========== Term Loan amount (Type) is not present =============");
+//        globalValue.d5518.validations.put(drools.getRule().getName(), false);
+//end
+
+rule "Term Loan amount (dataPointId 1008) must be present when Term Loan amount (Type) (dataPointId 5518) is present"
+    when
+        $x: ai.alphastream.model2.Value(dataPointId == 5518, value != null && !value.empty)
+        $y: ai.alphastream.model2.Value(dataPointId == 1008, value == null || value.empty)
+    then
+        System.out.println("========== Term Loan amount is not present when Term Loan amount (Type) is present =============");
+        $y.validations.put(drools.getRule().getName(), false);
+    end
+
+rule "Term Loan amount (Type) (dataPointId 5518) must be present when Term Loan amount (dataPointId 1008) is present"
+    when
+        $x: ai.alphastream.model2.Value(dataPointId == 1008, value != null && !value.empty)
+        $y: ai.alphastream.model2.Value(dataPointId == 5518, value == null || value.empty)
+    then
+        System.out.println("========== Term Loan amount (Type) is not present when Term Loan amount is present =============");
+        $y.validations.put(drools.getRule().getName(), false);
+    end
+
+//rule "testing"
+//    when
+//        Value((d5518.dataPointId > 6000))
+//    then
+//        System.out.println("========== Term Loan amount (Type) is not present when Term Loan amount is present =============");
+//        globalValue.d5518.validations.put(drools.getRule().getName(), false);
+//    end
+
+
+rule "Not empty validation rule"
+    when
+//        DataPoint(dataPointId == 1008)
+//        $x: globalValidationRulesMap["Not Empty"]
+        $z: ai.alphastream.model2.Value(globalValidationRulesMap["NotEmpty"] contains dataPointId, value == null || value.empty)
+//        DataPoint($x contains dataPointId)
+
+//        $y: DataPoint($z.value == null || $z.value.empty)
+    then
+        System.out.println("========== NotEmpty =============");
+        System.out.println($z);
+//        System.out.println($x);
+        $z.validations.put(drools.getRule().getName(), false);
+        System.out.println(globalValidationRulesMap);
+    end
+
+rule "Percentage validation rule"
+    when
+        $z: ai.alphastream.model2.Value(globalValidationRulesMap["Percentage"] contains dataPointId, !isPercentage(value))
+    then
+        System.out.println("========== Percentage =============");
+        System.out.println($z);
+        $z.validations.put(drools.getRule().getName(), false);
+        System.out.println(globalValidationRulesMap);
+    end
+
+rule "Money validation rule"
+    when
+        $z: ai.alphastream.model2.Value(globalValidationRulesMap["Money"] contains dataPointId, !isMoney(value))
+    then
+        System.out.println("========== Money =============");
+        System.out.println($z);
+        $z.validations.put(drools.getRule().getName(), false);
+        System.out.println(globalValidationRulesMap);
+    end
+
+// example rule validation with custom made functions
+// ascending descending rules
+// custom money, percentage, ratio, year, months validation
+
+rule "ECF Initial Sweep % (dataPointId 2001) must be highest among all sweep %s"
+    when
+        $x: ai.alphastream.model2.Value(dataPointId == 2001, value != null && !value.empty)
+        $y: ai.alphastream.model2.Value(dataPointId == 1775, value != null && !value.empty && !comparePercentageValues($x.value, value))
+    then
+        System.out.println("========== Term Loan amount is not present when Term Loan amount (Type) is present =============");
+        $y.validations.put(drools.getRule().getName(), false);
+    end

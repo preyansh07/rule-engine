@@ -1,0 +1,48 @@
+import ai.alphastream.model.Value;
+global ai.alphastream.model.Value globalValue;
+
+dialect "mvel"
+
+rule "dataPointId 1008 must be present"
+    when
+        Value(d1008.value == null )
+    then
+        System.out.println("========== Term Loan amount is not present =============");
+
+        System.out.println("before");
+        System.out.println(globalValue.d1008.value);
+        System.out.println(globalValue.d1008.validations);
+
+//        $value.help.getAdditionalProperties().put(drools.getRule().getName(), false);
+        globalValue.d1008.validations.put(drools.getRule().getName(), false);
+
+        System.out.println("after");
+        System.out.println(globalValue.d1008.value);
+        System.out.println(globalValue.d1008.validations);
+
+//        update($value);
+end
+
+//rule "Customer type based discount - Loyal customer"
+//    when
+//        OrderRequest(customerType.getValue == "LOYAL")
+//    then
+//        System.out.println("==========Adding 5% discount for LOYAL customer=============");
+//        orderDiscount.setDiscount(orderDiscount.getDiscount() + 5);
+//end
+//
+//rule "Customer type based discount - others"
+//    when
+//        OrderRequest(customerType.getValue != "LOYAL")
+//    then
+//        System.out.println("==========Adding 3% discount for NEW or DISSATISFIED customer=============");
+//        orderDiscount.setDiscount(orderDiscount.getDiscount() + 3);
+//end
+//
+//rule "Amount based discount"
+//    when
+//        OrderRequest(amount > 1000L)
+//    then
+//        System.out.println("==========Adding 5% discount for amount more than 1000$=============");
+//        orderDiscount.setDiscount(orderDiscount.getDiscount() + 5);
+//end
